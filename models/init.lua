@@ -30,8 +30,8 @@ function M.setup(opt, checkpoint)
       model = torch.load(opt.retrain):type(opt.tensorType)
       model.__memoryOptimized = nil
    else
-      print('=> Creating model from file: models/' .. opt.netType .. '.lua')
-      model = require('models/' .. opt.netType)(opt)
+      print('=> Creating model from file: models/' .. opt.netName .. '.lua')
+      model = require('models/' .. opt.netName)(opt)
    end
 
    -- First remove any DataParallelTable

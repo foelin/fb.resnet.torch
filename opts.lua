@@ -40,7 +40,8 @@ function M.parse(arg)
    cmd:option('-momentum',        0.9,   'momentum')
    cmd:option('-weightDecay',     1e-4,  'weight decay')
    ---------- Model options ----------------------------------
-   cmd:option('-netType',      'resnet', 'Options: resnet | preresnet')
+   cmd:option('-netName',      'resnet', 'Options: resnet | preresnet')
+   cmd:option('-netType',      'A', 'Options: A | B| C')
    cmd:option('-depth',        34,       'ResNet depth: 18 | 34 | 50 | 101 | ...', 'number')
    cmd:option('-shortcutType', '',       'Options: A | B | C')
    cmd:option('-retrain',      'none',   'Path to model to retrain with')
@@ -60,9 +61,6 @@ function M.parse(arg)
    opt.optnet = opt.optnet ~= 'false'
    opt.resetClassifier = opt.resetClassifier ~= 'false'
 
-   if not paths.dirp(opt.save) and not paths.mkdir(opt.save) then
-      cmd:error('error: unable to create checkpoint directory: ' .. opt.save .. '\n')
-   end
 
    if opt.dataset == 'imagenet' then
       -- Handle the most common case of missing -data flag
@@ -105,6 +103,22 @@ function M.parse(arg)
    if opt.shareGradInput and opt.optnet then
       cmd:error('error: cannot use both -shareGradInput and -optnet')
    end
+
+   local used_opt={'batchSize', 'shortcutType', 'netType'}
+    
+   local result_folder = {}
+   for k,v in pairs(opt) do
+      result_folder[k]=true
+   end
+   for i=1,#used_opt do
+      result_folder[used_opt[i]]=false
+   end
+
+   opt.save = paths.concat(opt.save, cmd:string(opt.netName .. '_' .. opt.depth, opt, result_folder))
+   if not paths.dirp(opt.save) and not paths.mkdir(opt.save) then
+      cmd:error('error: unable to create checkpoint directory: ' .. opt.save .. '\n')
+   end
+
 
    return opt
 end
